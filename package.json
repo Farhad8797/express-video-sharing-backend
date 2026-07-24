@@ -1,0 +1,23 @@
+{
+  "name": "web-dev-backend",
+  "version": "1.0.0",
+  "description": "Web development backend series",
+  "license": "ISC",
+  "author": "Md Farhad Hossain",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2"
+  }
+}
