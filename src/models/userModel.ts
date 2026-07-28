@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Model, Schema } from "mongoose";
 import * as bcrypt from "bcrypt-ts";
 import jwt from "jsonwebtoken";
 
@@ -15,7 +15,17 @@ export interface UserInterface {
     watchHistory: Schema.Types.ObjectId[];
 }
 
-const UserSchema = new Schema<UserInterface>(
+interface UserMethods {
+    isPasswordCorrect(name: string): Promise<any>;
+    generateAccessToken(): string;
+    generateRefreshToken(): string;
+}
+
+const UserSchema = new Schema<
+    UserInterface,
+    Model<UserInterface, {}, UserMethods>,
+    UserMethods
+>(
     {
         username: {
             type: String,
@@ -71,7 +81,9 @@ const UserSchema = new Schema<UserInterface>(
             type: String
         }
     },
-    { timestamps: true }
+    {
+        timestamps: true
+    }
 );
 
 UserSchema.pre("save", async function () {
@@ -79,11 +91,14 @@ UserSchema.pre("save", async function () {
     this.password = await bcrypt.hash(this.password, 10);
 });
 
-UserSchema.methods.isPasswordCorrect = async function (password: string) {
-    return await bcrypt.compare(this.password, password);
-};
+UserSchema.method(
+    "isPasswordCorrect",
+    async function isPasswordCorrect(password: string) {
+        return await bcrypt.compare(this.password, password);
+    }
+);
 
-UserSchema.methods.generateAccesToken = function () {
+UserSchema.method("generateAccessToken", function generateAccessToken() {
     return jwt.sign(
         {
             _id: this._id,
@@ -96,9 +111,9 @@ UserSchema.methods.generateAccesToken = function () {
             expiresIn: "1d"
         }
     );
-};
+});
 
-UserSchema.methods.generateRefreshToken = function () {
+UserSchema.method("generateRefreshToken", function generateRefreshToken() {
     return jwt.sign(
         {
             _id: this._id
@@ -108,10 +123,10 @@ UserSchema.methods.generateRefreshToken = function () {
             expiresIn: "10d"
         }
     );
-};
+});
 
 const User =
-    (mongoose.models.User as mongoose.Model<UserInterface>) ||
-    mongoose.model<UserInterface>("User", UserSchema);
+    (mongoose.models.User as mongoose.Model<UserInterface, {}, UserMethods>) ||
+    mongoose.model<UserInterface, UserMethods>("User", UserSchema);
 
 export default User;

@@ -4,6 +4,7 @@ import type { UserInterface } from "../models/userModel.js";
 import User from "../models/userModel.js";
 import { uploadFile } from "../utils/imagekit.js";
 import { clearTemp } from "../utils/clearTemp.js";
+import { generateAccessAndRefreshToken } from "../utils/generateTokens.js";
 
 const registerUser = asycncHandler(async (req, res) => {
     const { fullName, username, email, password }: UserInterface = req.body;
@@ -12,7 +13,8 @@ const registerUser = asycncHandler(async (req, res) => {
             (element) => element?.trim() === ""
         )
     ) {
-        return res.json(
+        clearTemp();
+        return res.status(400).json(
             apiResponse({
                 statusCode: 400,
                 message: "Credentials not provided",
@@ -27,7 +29,7 @@ const registerUser = asycncHandler(async (req, res) => {
 
     if (existingUser) {
         clearTemp();
-        return res.json(
+        return res.status(409).json(
             apiResponse({
                 statusCode: 409,
                 message: "User already exists",
@@ -41,7 +43,8 @@ const registerUser = asycncHandler(async (req, res) => {
     const coverImageLocalPath = files?.coverImage?.[0]?.path;
 
     if (!avatarLocalPath) {
-        return res.json(
+        clearTemp();
+        return res.status(400).json(
             apiResponse({
                 statusCode: 400,
                 message: "Avatar not provided",
@@ -57,7 +60,7 @@ const registerUser = asycncHandler(async (req, res) => {
     );
 
     if (!avatar) {
-        return res.json(
+        return res.status(400).json(
             apiResponse({
                 statusCode: 400,
                 message: "Avatar not uploaded to Imagekit",
@@ -80,7 +83,7 @@ const registerUser = asycncHandler(async (req, res) => {
     );
 
     if (!savedUserData) {
-        return res.json(
+        return res.status(500).json(
             apiResponse({
                 statusCode: 500,
                 message: "Internal sever error",
@@ -89,7 +92,7 @@ const registerUser = asycncHandler(async (req, res) => {
         );
     }
 
-    return res.json(
+    return res.status(201).json(
         apiResponse({
             statusCode: 201,
             message: "User Created Successfully",
@@ -98,4 +101,87 @@ const registerUser = asycncHandler(async (req, res) => {
     );
 });
 
-export { registerUser };
+const signInUser = asycncHandler(async (req, res) => {
+    const { email, username, password }: UserInterface = req.body;
+    if (!email && !username) {
+        return res.status(400).json(
+            apiResponse({
+                statusCode: 400,
+                message: "Email or username must be provided",
+                success: false
+            })
+        );
+    }
+
+    const user = await User.findOne({
+        $or: [{ email, password }]
+    });
+
+    if (!user) {
+        return res.status(400).json(
+            apiResponse({
+                statusCode: 400,
+                message: "User is not registered",
+                success: false
+            })
+        );
+    }
+
+    const isPasswordCorrect = await user.isPasswordCorrect(password);
+
+    if (!isPasswordCorrect) {
+        return res.status(401).json(
+            apiResponse({
+                statusCode: 401,
+                message: "Incorrect password",
+                success: false
+            })
+        );
+    }
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+        user._id.toString()
+    );
+
+    const loggedInUser = await User.findById(user._id).select(
+        "-password -refreshToken"
+    );
+
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, { httpOnly: true, secure: true })
+        .cookie("refreshToken", refreshToken, { httpOnly: true, secure: true })
+        .json(
+            apiResponse({
+                statusCode: 200,
+                message: "user logged in successfully",
+                data: { loggedInUser, refreshToken },
+                success: true
+            })
+        );
+});
+
+const signOutUser = asycncHandler(async (req, res) => {
+    const user = req.user;
+    await User.findByIdAndUpdate(
+        user._id,
+        {
+            $set: { refreshToken: undefined }
+        },
+        {
+            new: true,
+            runValidators: true
+        }
+    );
+
+    return res
+        .status(200)
+        .json(
+            apiResponse({
+                statusCode: 200,
+                message: "Successfully logged out user"
+            })
+        );
+});
+
+export { registerUser, signInUser, signOutUser };
