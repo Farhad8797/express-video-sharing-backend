@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import * as bcrypt from "bcrypt-ts";
 import jwt from "jsonwebtoken";
 
-interface User {
+export interface UserInterface {
     username: string;
     email: string;
     fullName: string;
@@ -15,7 +15,7 @@ interface User {
     watchHistory: Schema.Types.ObjectId[];
 }
 
-const UserSchema = new Schema<User>(
+const UserSchema = new Schema<UserInterface>(
     {
         username: {
             type: String,
@@ -111,7 +111,7 @@ UserSchema.methods.generateRefreshToken = function () {
 };
 
 const User =
-    (mongoose.models.User as mongoose.Model<User>) ||
-    mongoose.model("User", UserSchema);
+    (mongoose.models.User as mongoose.Model<UserInterface>) ||
+    mongoose.model<UserInterface>("User", UserSchema);
 
 export default User;

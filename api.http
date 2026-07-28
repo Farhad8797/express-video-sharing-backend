@@ -1,0 +1,31 @@
+POST  http://localhost:8000/register
+Content-Type: multipart/form-data; boundary=----MyCustomBoundary
+
+------MyCustomBoundary
+Content-Disposition: form-data; name="username"
+
+john_doe
+------MyCustomBoundary
+Content-Disposition: form-data; name="email"
+
+john@example.com
+------MyCustomBoundary
+Content-Disposition: form-data; name="password"
+
+Secret123!
+------MyCustomBoundary
+Content-Disposition: form-data; name="fullName"
+
+Md_Farhad_Hossain
+------MyCustomBoundary
+Content-Disposition: form-data; name="avatar"; filename="avatar.png"
+Content-Type: image/png
+
+< C:\Users\HP\OneDrive\Pictures\Screenshots\Screenshot (13).png
+------MyCustomBoundary
+Content-Disposition: form-data; name="coverImage"; filename="cover.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\HP\OneDrive\Pictures\Screenshots\Screenshot (13).png
+------MyCustomBoundary--
+

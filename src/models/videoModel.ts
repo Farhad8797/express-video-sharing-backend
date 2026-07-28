@@ -1,7 +1,7 @@
 import mongoose, { mongoosePopulatedDocumentMarker, Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-interface Video {
+export interface VideoInterface {
     videoFile: string;
     thumbnail: string;
     owner: Schema.Types.ObjectId;
@@ -14,7 +14,7 @@ interface Video {
     updatedAt: Date;
 }
 
-const VideoSchema = new Schema<Video>(
+const VideoSchema = new Schema<VideoInterface>(
     {
         videoFile: {
             type: String,
@@ -60,3 +60,9 @@ const VideoSchema = new Schema<Video>(
 );
 
 VideoSchema.plugin(mongooseAggregatePaginate);
+
+const Video =
+    (mongoose.models.Video as mongoose.Model<VideoInterface>) ||
+    mongoose.model<VideoInterface>("Video", VideoSchema);
+
+export default Video;

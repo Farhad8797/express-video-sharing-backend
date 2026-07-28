@@ -1,6 +1,8 @@
 import ImageKit from "@imagekit/nodejs";
 import * as fs from "fs";
-import { apiError } from "./apiError.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const client = new ImageKit({
     privateKey: process.env.IMAGEKIT_PRIVATE_KEY // This is the default and can be omitted
@@ -17,7 +19,7 @@ export async function uploadFile(filepath: string, fileName: string) {
         return response;
     } catch (err: any) {
         console.log("Error uploading file: ", err?.message || err);
-        return apiError(500, `Error uploading file: ${err?.message || err}`);
+        return null;
     } finally {
         fs.unlink(filepath, (err) => {
             if (err) console.log(`Error deleting file: ${err.message}`);
