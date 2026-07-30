@@ -467,6 +467,92 @@ const updateCoverImage = asyncHandler(async (req, res) => {
     );
 });
 
+const getUserChannel = asyncHandler(async (req, res) => {
+    const { username } = req.params;
+    if (!username) {
+        return res.status(400).json(
+            apiResponse({
+                statusCode: 400,
+                message: "Username is required",
+                success: true
+            })
+        );
+    }
+
+    const channel = await User.aggregate([
+        {
+            $match: {
+                username: username?.toString()?.trim()?.toLowerCase()
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "channels"
+            }
+        },
+        {
+            $addFields: {
+                subscribersCount: {
+                    $size: "$subscribers"
+                },
+                channelsSubscribedToCount: {
+                    $size: "$channels"
+                },
+                isSubscribedTo: {
+                    $cond: {
+                        if: {
+                            $in: [req?.user?._id, "$subscribers.subscriber"]
+                        },
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                username: 1,
+                email: 1,
+                subscribersCount: 1,
+                channelsSubscribedToCount: 1,
+                isSubscribedTo: 1,
+                avatar: 1,
+                coverImage: 1
+            }
+        }
+    ]);
+
+    if (!channel?.length) {
+        return res.status(400).json(
+            apiResponse({
+                statusCode: 400,
+                message: "Query did not match",
+                success: true
+            })
+        );
+    }
+
+    return res.status(400).json(
+        apiResponse({
+            statusCode: 400,
+            message: "Channel info has been retrieved successfully",
+            success: true,
+            data: channel[0] || {}
+        })
+    );
+});
+
 export {
     registerUser,
     signInUser,
@@ -476,5 +562,6 @@ export {
     getCurrentUser,
     updateUserAccountInfo,
     updateAvatar,
-    updateCoverImage
+    updateCoverImage,
+    getUserChannel
 };

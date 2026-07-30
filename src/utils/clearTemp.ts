@@ -6,10 +6,13 @@ export function clearTemp() {
     if (!fs.existsSync(folderPath)) return;
 
     const files = fs.readdirSync(folderPath);
+
+    if (!files) return;
     for (let file of files) {
         const filePath = path.join(folderPath, file);
         if (!fs.statSync(filePath).isFile()) return;
         fs.unlinkSync(filePath);
     }
     console.log("Temp files have been deleted");
+    return;
 }
