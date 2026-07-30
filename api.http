@@ -29,3 +29,14 @@ Content-Type: image/jpeg
 < C:\Users\HP\OneDrive\Pictures\Screenshots\Screenshot (13).png
 ------MyCustomBoundary--
 
+###
+POST http://localhost:8000/signIn
+Content-Type: application/json
+
+{
+    "email": "john@example.com",
+    "password": "Secret123!"
+}
+
+###
+POST http://localhost:8000/signOut

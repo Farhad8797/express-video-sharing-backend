@@ -1,6 +1,6 @@
 import User from "../models/userModel.js";
 import { apiResponse } from "../utils/apiResponse.js";
-import { asycncHandler } from "../utils/asyncHandler.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 
 export interface CustomJwtPayload extends JwtPayload {
@@ -10,7 +10,7 @@ export interface CustomJwtPayload extends JwtPayload {
     fullName: string;
 }
 
-export const verifyJWT = asycncHandler(async (req, res, next) => {
+export const verifyJWT = asyncHandler(async (req, res, next) => {
     const accessToken =
         req.cookies?.accessToken ||
         req.header("Authorization")?.split(" ")[1] ||
@@ -29,7 +29,8 @@ export const verifyJWT = asycncHandler(async (req, res, next) => {
     const isValidToken = jwt.verify(
         accessToken,
         process.env.ACCESS_TOKEN_SECRET as string
-    );
+    ) as CustomJwtPayload;
+
     if (!isValidToken) {
         return res.status(401).json(
             apiResponse({
@@ -40,8 +41,7 @@ export const verifyJWT = asycncHandler(async (req, res, next) => {
         );
     }
 
-    const decodedToken = jwt.decode(isValidToken as string) as CustomJwtPayload;
-    const user = await User.findById(decodedToken?._id);
+    const user = await User.findById(isValidToken?._id);
 
     if (!user) {
         return res.status(401).json(

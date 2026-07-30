@@ -1,5 +1,4 @@
 import User from "../models/userModel.js";
-import { apiResponse } from "./apiResponse.js";
 
 export async function generateAccessAndRefreshToken(userId: string) {
     try {
