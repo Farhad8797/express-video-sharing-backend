@@ -1,4 +1,4 @@
-POST  http://localhost:8000/register
+POST  http://localhost:8000/api/register
 Content-Type: multipart/form-data; boundary=----MyCustomBoundary
 
 ------MyCustomBoundary
@@ -30,7 +30,7 @@ Content-Type: image/jpeg
 ------MyCustomBoundary--
 
 ###
-POST http://localhost:8000/signIn
+POST http://localhost:8000/api/signIn
 Content-Type: application/json
 
 {
@@ -39,4 +39,53 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:8000/signOut
+POST http://localhost:8000/api/signOut
+
+###
+GET http://localhost:8000/something
+
+###
+POST http://localhost:8000/api/refresh-token
+
+###
+GET http://localhost:8000/api/get-current-user
+
+###
+PATCH http://localhost:8000/api/change-password
+Content-Type: application/json
+
+{
+    "oldPassword": "Secret123!",
+    "newPassword": "asdfghjkl"
+}
+
+###
+PATCH http://localhost:8000/api/update-account-info
+Content-Type: application/json
+
+{
+    "email": "gdvbhbhb@gmail.com",
+    "fullName": "Fahad Bin Ibrahim"
+}
+
+###
+PATCH http://localhost:8000/api/update-avatar
+Content-Type: multipart/form-data; boundary=myBoundary
+
+--myBoundary
+Content-Disposition: form-data; name="avatar"; filename="avatar.png"
+Content-Type: image/jpeg
+
+< C:\Users\HP\OneDrive\Documents\King-01.jpg
+--myBoundary--
+
+###
+PATCH http://localhost:8000/api/update-coverImage
+Content-Type: multipart/form-data; boundary=myBoundary
+
+--myBoundary
+Content-Disposition: form-data; name="coverImage"; filename="cover.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\HP\OneDrive\Documents\King-01.jpg
+--myBoundary--

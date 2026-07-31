@@ -7,6 +7,7 @@ import { clearTemp } from "../utils/clearTemp.js";
 import { generateAccessAndRefreshToken } from "../utils/generateTokens.js";
 import jwt from "jsonwebtoken";
 import { type CustomJwtPayload } from "../middlewares/auth.js";
+import mongoose from "mongoose";
 
 const options: object = {
     httpOnly: true,
@@ -173,7 +174,7 @@ const signOutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         user._id,
         {
-            $set: { refreshToken: undefined }
+            $unset: { refreshToken: 1 }
         },
         {
             new: true,
@@ -277,8 +278,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             .json(
                 apiResponse({
                     statusCode: 200,
-                    message: "user logged in successfully",
-                    data: { user }
+                    message: "New refresh token generated successfully!",
+                    data: { refreshToken }
                 })
             );
     } catch (error) {
@@ -306,7 +307,7 @@ const changePassword = asyncHandler(async (req, res) => {
     }
 
     const user = await User.findById(req.user?._id).select("+password");
-    const isPasswordCorrect = await user!.isPasswordCorrect(newPassword);
+    const isPasswordCorrect = await user!.isPasswordCorrect(oldPassword);
     if (!isPasswordCorrect) {
         return res.status(401).json(
             apiResponse({
@@ -362,18 +363,19 @@ const updateUserAccountInfo = asyncHandler(async (req, res) => {
             new: true,
             runValidators: true
         }
-    ).select("-password");
+    ).select("-password -refreshToken");
 
     return res.status(200).json(
         apiResponse({
             statusCode: 400,
-            message: "Account details have been updated!"
+            message: "Account details have been updated!",
+            data: { user }
         })
     );
 });
 
 const updateAvatar = asyncHandler(async (req, res) => {
-    const avatarLocalPath: string | undefined = req.file?.path;
+    const avatarLocalPath: string | undefined = req?.file?.path;
 
     if (!avatarLocalPath) {
         clearTemp();
@@ -413,7 +415,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
         apiResponse({
             statusCode: 200,
             message: "Avatar has been updated",
-            data: { ...user }
+            data: { newAvatarUrl: newAvatar?.url }
         })
     );
 });
@@ -432,11 +434,11 @@ const updateCoverImage = asyncHandler(async (req, res) => {
         );
     }
 
-    const newCoverImager = await uploadFile(
+    const newCoverImage = await uploadFile(
         coverImageLocalPath as string,
         "coverImage"
     );
-    if (!newCoverImager?.url) {
+    if (!newCoverImage?.url) {
         clearTemp();
         return res.status(400).json(
             apiResponse({
@@ -450,7 +452,7 @@ const updateCoverImage = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
-            $set: { coverImage: newCoverImager?.url }
+            $set: { coverImage: newCoverImage?.url }
         },
         {
             new: true,
@@ -462,7 +464,7 @@ const updateCoverImage = asyncHandler(async (req, res) => {
         apiResponse({
             statusCode: 200,
             message: "Cover Image has been updated",
-            data: { ...user }
+            data: { coverImage: newCoverImage?.url }
         })
     );
 });
@@ -553,6 +555,74 @@ const getUserChannel = asyncHandler(async (req, res) => {
     );
 });
 
+const getUserWatchHistory = asyncHandler(async (req, res) => {
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(req?.user?._id)
+            }
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullName: 1,
+                                        username: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            owner: {
+                                $first: "$owner"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $project: {
+                password: 0,
+                refreshToken: 0
+            }
+        }
+    ]);
+
+    if (!user?.length) {
+        return res.status(400).json(
+            apiResponse({
+                statusCode: 400,
+                message: "No watch history has been found",
+                data: user?.[0]?.watchHistory || []
+            })
+        );
+    }
+
+    return res.status(200).json(
+        apiResponse({
+            statusCode: 200,
+            message: "No watch history has been found",
+            data: user?.[0]?.watchHistory
+        })
+    );
+});
+
 export {
     registerUser,
     signInUser,
@@ -563,5 +633,6 @@ export {
     updateUserAccountInfo,
     updateAvatar,
     updateCoverImage,
-    getUserChannel
+    getUserChannel,
+    getUserWatchHistory
 };

@@ -53,7 +53,7 @@ const VideoSchema = new Schema<VideoInterface>(
 
         owner: {
             type: Schema.Types.ObjectId,
-            required: true
+            ref: "User"
         }
     },
     { timestamps: true }

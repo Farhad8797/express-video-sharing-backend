@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { type Request, type Response } from "express";
 
 const app = express();
 
@@ -30,7 +31,17 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 
 import userRoute from "./routes/user.route.js";
+import { apiResponse } from "./utils/apiResponse.js";
 
-app.use("/", userRoute);
+app.use("/api", userRoute);
+app.use("/*splat", (req: Request, res: Response) => {
+    return res.status(404).json(
+        apiResponse({
+            statusCode: 404,
+            message: `Page ${req.originalUrl} Not Found!`,
+            success: false
+        })
+    );
+});
 
 export { app };

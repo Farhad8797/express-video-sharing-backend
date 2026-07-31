@@ -41,7 +41,9 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         );
     }
 
-    const user = await User.findById(isValidToken?._id);
+    const user = await User.findById(isValidToken?._id).select(
+        "-password -refreshToken"
+    );
 
     if (!user) {
         return res.status(401).json(

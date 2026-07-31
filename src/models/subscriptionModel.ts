@@ -21,10 +21,6 @@ const SubscriptionSchema = new Schema<SubscriptionInterface>(
     { timestamps: true }
 );
 
-export const SubscriptionModel =
-    (mongoose.models
-        .SubscriptionModel as mongoose.Model<SubscriptionInterface>) ||
-    mongoose.model<SubscriptionInterface>(
-        "SubsscriptionModel",
-        SubscriptionSchema
-    );
+export const Subscription =
+    (mongoose.models.Subscription as mongoose.Model<SubscriptionInterface>) ||
+    mongoose.model<SubscriptionInterface>("Subscription", SubscriptionSchema);
