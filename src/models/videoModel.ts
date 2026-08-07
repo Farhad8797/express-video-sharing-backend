@@ -2,8 +2,14 @@ import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 export interface VideoInterface {
-    videoFile: string;
-    thumbnail: string;
+    videoFile: {
+        videoUrl: string;
+        videoId: string;
+    };
+    thumbnail: {
+        thumbnailUrl: string;
+        thumbnailId: string;
+    };
     owner: Schema.Types.ObjectId;
     title: string;
     description: string;
@@ -17,13 +23,25 @@ export interface VideoInterface {
 const VideoSchema = new Schema<VideoInterface>(
     {
         videoFile: {
-            type: String,
-            required: true
+            videoUrl: {
+                type: String,
+                required: true
+            },
+            videoId: {
+                type: String,
+                required: true
+            }
         },
 
         thumbnail: {
-            type: String,
-            required: true
+            thumbnailUrl: {
+                type: String,
+                required: true
+            },
+            thumbnailId: {
+                type: String,
+                required: true
+            }
         },
 
         title: {
@@ -48,7 +66,8 @@ const VideoSchema = new Schema<VideoInterface>(
 
         isPublished: {
             type: Boolean,
-            required: true
+            required: true,
+            default: false
         },
 
         owner: {
