@@ -177,14 +177,8 @@ const updateVideoStatus = asyncHandler(async (req, res) => {
             })
         );
     }
-
-    const video = await Video.findByIdAndUpdate(
-        videoId,
-        {
-            $set: { isPublished: { $not: "$isPublished" } }
-        },
-        { new: true }
-    );
+    const userId = req.user?._id;
+    const video = await Video.findById(videoId);
     if (!video) {
         return res.status(404).json(
             apiResponse({
@@ -195,10 +189,22 @@ const updateVideoStatus = asyncHandler(async (req, res) => {
         );
     }
 
+    const isOwner = video.owner.toString() === userId.toString();
+    if (!isOwner) {
+        return res.status(403).json(
+            apiResponse({
+                statusCode: 403,
+                message: "Only owner can change the status of video.",
+                success: false
+            })
+        );
+    }
+    video.isPublished = !video.isPublished;
+    await video.save({ validateBeforeSave: false });
     return res.status(200).json(
         apiResponse({
             statusCode: 200,
-            message: "Video has been published!",
+            message: "Video status has been changed!",
             data: video
         })
     );
@@ -217,7 +223,7 @@ const increaseViewCount = asyncHandler(async (req, res) => {
         );
     }
 
-    const identifier = req.user?._id?.toString() || req.ip;
+    const identifier = req.ip;
     const redisKeyForViewer = `${videoId}+${identifier}`;
     const hasViewed = await redis.get(redisKeyForViewer);
     if (hasViewed) {
@@ -271,7 +277,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
         );
     }
 
-    const video = await Video.findByIdAndDelete(videoId);
+    const video = await Video.findById(videoId);
 
     if (!video) {
         return res.status(404).json(
@@ -282,6 +288,17 @@ const deleteVideo = asyncHandler(async (req, res) => {
             })
         );
     }
+    const isOwner = video.owner.toString() === req.user?._id.toString();
+    if (!isOwner) {
+        return res.status(403).json(
+            apiResponse({
+                statusCode: 403,
+                message: "Only owner can delete video.",
+                success: false
+            })
+        );
+    }
+    await video.deleteOne();
 
     try {
         await client.files.bulk.delete({

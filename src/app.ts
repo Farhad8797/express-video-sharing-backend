@@ -32,8 +32,12 @@ app.use(cookieParser());
 
 import userRoute from "./routes/user.route.js";
 import { apiResponse } from "./utils/apiResponse.js";
+import videoRoute from "./routes/video.route.js";
+import tweetRoute from "./routes/tweet.route.js";
 
 app.use("/api", userRoute);
+app.use("/api", videoRoute);
+app.use("/api", tweetRoute);
 app.use("/*splat", (req: Request, res: Response) => {
     return res.status(404).json(
         apiResponse({
