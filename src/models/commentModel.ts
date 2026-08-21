@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, type AggregatePaginateModel } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 interface CommentInterface {
@@ -7,6 +7,7 @@ interface CommentInterface {
     updatedAt: Date;
     video: Schema.Types.ObjectId;
     owner: Schema.Types.ObjectId;
+    tweet: Schema.Types.ObjectId;
 }
 
 const CommentSchema = new Schema<CommentInterface>(
@@ -22,6 +23,10 @@ const CommentSchema = new Schema<CommentInterface>(
         owner: {
             type: Schema.Types.ObjectId,
             ref: "User"
+        },
+        tweet: {
+            type: Schema.Types.ObjectId,
+            ref: "Tweet"
         }
     },
     { timestamps: true }
@@ -29,6 +34,9 @@ const CommentSchema = new Schema<CommentInterface>(
 
 CommentSchema.plugin(mongooseAggregatePaginate);
 
+type CommentModel = mongoose.Model<CommentInterface> &
+    mongoose.AggregatePaginateModel<CommentInterface>;
+
 export const Comment =
-    (mongoose.models.Comment as mongoose.Model<CommentInterface>) ||
-    mongoose.model<CommentInterface>("Comment", CommentSchema);
+    (mongoose.models.Comment as CommentModel) ||
+    mongoose.model<CommentInterface, CommentModel>("Comment", CommentSchema);
