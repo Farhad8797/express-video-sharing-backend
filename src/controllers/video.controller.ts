@@ -106,22 +106,60 @@ const findOneVideo = asyncHandler(async (req, res) => {
         );
     }
 
-    const video = await Video.findById(videoId);
-    if (!video) {
-        return res.status(400).json(
-            apiResponse({
-                statusCode: 400,
-                message: "Video not found",
-                success: false
-            })
-        );
-    }
+    const video = await Video.aggregate([
+        {
+            $match: {
+                _id: videoId
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+                pipeline: [
+                    {
+                        $project: {
+                            _id: 1,
+                            username: 1,
+                            fullName: 1,
+                            avatar: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $unwind: "$owner"
+        },
+        {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "video",
+                as: "likes"
+            }
+        },
+        {
+            $addFields: {
+                like_count: {
+                    $size: "$likes"
+                }
+            }
+        },
+        {
+            $project: {
+                likes: 0
+            }
+        }
+    ]);
 
-    return res.status(200).json(
+    return res.status(video.length ? 200 : 404).json(
         apiResponse({
-            statusCode: 200,
-            message: "Success!",
-            data: video
+            statusCode: video.length ? 200 : 404,
+            message: video.length ? "Success!" : "No video found for this id!",
+            data: video.length ? video[0] : {}
         })
     );
 });
