@@ -9,9 +9,9 @@ import { verifyJWT } from "../middlewares/auth.js";
 
 const likeRoute = Router();
 
-likeRoute.get("/like{:/videoId}", verifyJWT, toggleVideoLike);
-likeRoute.get("/like{:/tweetId}", verifyJWT, toggleTweetLike);
-likeRoute.get("/like{:/commentId}", verifyJWT, toggleCommentLike);
-likeRoute.get("/like{:/userId}", verifyJWT, getLikedVideos);
+likeRoute.post("/like/v/{:/videoId}", verifyJWT, toggleVideoLike);
+likeRoute.post("/like/t/{:/tweetId}", verifyJWT, toggleTweetLike);
+likeRoute.post("/like/c/{:/commentId}", verifyJWT, toggleCommentLike);
+likeRoute.get("/like/u/{:/userId}", verifyJWT, getLikedVideos);
 
 export default likeRoute;

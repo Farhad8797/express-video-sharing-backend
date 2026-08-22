@@ -11,7 +11,7 @@ const tweetRoute = Router();
 
 tweetRoute.post("/create-tweet", verifyJWT, createTweet);
 tweetRoute.get("/comments{:/userId}", getUserTweet);
-tweetRoute.patch("/tweet{:/tweetid}", verifyJWT, updateTweet);
-tweetRoute.delete("/tweet{:/tweetId}", verifyJWT, deleteTweet);
+tweetRoute.patch("/tweet/u/{:/tweetid}", verifyJWT, updateTweet);
+tweetRoute.delete("/tweet/d/{:/tweetId}", verifyJWT, deleteTweet);
 
 export default tweetRoute;

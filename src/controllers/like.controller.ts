@@ -9,7 +9,7 @@ import { Comment } from "../models/commentModel.js";
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
 
-    if (videoId || !mongoose.Types.ObjectId.isValid(videoId as string)) {
+    if (!videoId || !mongoose.Types.ObjectId.isValid(videoId as string)) {
         return res.status(400).json(
             apiResponse({
                 statusCode: 400,
@@ -63,7 +63,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
 const toggleTweetLike = asyncHandler(async (req, res) => {
     const { tweetId } = req.params;
 
-    if (tweetId || !mongoose.Types.ObjectId.isValid(tweetId as string)) {
+    if (!tweetId || !mongoose.Types.ObjectId.isValid(tweetId as string)) {
         return res.status(400).json(
             apiResponse({
                 statusCode: 400,
@@ -117,7 +117,7 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 const toggleCommentLike = asyncHandler(async (req, res) => {
     const { commentId } = req.params;
 
-    if (commentId || !mongoose.Types.ObjectId.isValid(commentId as string)) {
+    if (!commentId || !mongoose.Types.ObjectId.isValid(commentId as string)) {
         return res.status(400).json(
             apiResponse({
                 statusCode: 400,

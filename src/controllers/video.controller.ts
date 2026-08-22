@@ -96,11 +96,11 @@ const publishVideo = asyncHandler(async (req, res) => {
 
 const findOneVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
-    if (!videoId) {
+    if (!videoId || !mongoose.Types.ObjectId.isValid(videoId as string)) {
         return res.status(400).json(
             apiResponse({
                 statusCode: 400,
-                message: "Video Id is required",
+                message: "Video Id missing or inavlid",
                 success: false
             })
         );
@@ -109,7 +109,7 @@ const findOneVideo = asyncHandler(async (req, res) => {
     const video = await Video.aggregate([
         {
             $match: {
-                _id: videoId
+                _id: new mongoose.Types.ObjectId(videoId as string)
             }
         },
         {
