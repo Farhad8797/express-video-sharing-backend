@@ -26,12 +26,12 @@ const PlaylistSchema = new Schema<PlaylistInterface>(
                     ref: "Video"
                 }
             ],
-            validate: [
-                function (val: Schema.Types.ObjectId[]) {
+            validate: {
+                validator: function (val: Schema.Types.ObjectId[]) {
                     return val.length <= 50;
                 },
-                "Maximum no. of video in a playlist can not exceed 50"
-            ]
+                message: "One playlist can contain maximum 50 videos."
+            }
         },
 
         owner: {
