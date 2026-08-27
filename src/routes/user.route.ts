@@ -10,7 +10,8 @@ import {
     updateAvatar,
     updateCoverImage,
     getUserChannel,
-    getUserWatchHistory
+    getUserWatchHistory,
+    deleteUserAccount
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
 import { verifyJWT } from "../middlewares/auth.js";
@@ -53,5 +54,6 @@ userRoute.patch(
 
 userRoute.get("/channel{/:username}", verifyJWT, getUserChannel);
 userRoute.get("/watch-history", verifyJWT, getUserWatchHistory);
+userRoute.post("/delete-account{:/userId}", verifyJWT, deleteUserAccount);
 
 export default userRoute;

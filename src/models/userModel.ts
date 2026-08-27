@@ -6,8 +6,14 @@ export interface UserInterface {
     username: string;
     email: string;
     fullName: string;
-    avatar: string;
-    coverImage: string;
+    avatarFile: {
+        avatarUrl: string;
+        avatarId: string;
+    };
+    coverImageFile: {
+        coverImageUrl: string;
+        coverImageId: string;
+    };
     password: string;
     refreshToken: string;
     createdAt: Date;
@@ -55,13 +61,22 @@ const UserSchema = new Schema<
             index: true
         },
 
-        avatar: {
-            type: String,
-            required: true
+        avatarFile: {
+            avatarUrl: {
+                type: String
+            },
+            avatarId: {
+                type: String
+            }
         },
 
-        coverImage: {
-            type: String
+        coverImageFile: {
+            coverImageUrl: {
+                type: String
+            },
+            coverImageId: {
+                type: String
+            }
         },
 
         watchHistory: [

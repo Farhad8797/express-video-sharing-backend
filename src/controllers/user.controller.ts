@@ -2,12 +2,18 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import type { UserInterface } from "../models/userModel.js";
 import User from "../models/userModel.js";
-import { uploadFile } from "../utils/imagekit.js";
+import { client, uploadFile } from "../utils/imagekit.js";
 import { clearTemp } from "../utils/clearTemp.js";
 import { generateAccessAndRefreshToken } from "../utils/generateTokens.js";
 import jwt from "jsonwebtoken";
 import { type CustomJwtPayload } from "../middlewares/auth.js";
 import mongoose from "mongoose";
+import Video from "../models/videoModel.js";
+import { Tweet } from "../models/tweetModel.js";
+import { Subscription } from "../models/subscriptionModel.js";
+import { Like } from "../models/likeModel.js";
+import { Comment } from "../models/commentModel.js";
+import { Playlist } from "../models/playlistModel.js";
 
 const options: object = {
     httpOnly: true,
@@ -83,8 +89,14 @@ const registerUser = asyncHandler(async (req, res) => {
         email,
         fullName,
         password,
-        avatar: avatar.url as string,
-        coverImage: coverImage?.url || ""
+        avatarFile: {
+            avatarUrl: (avatar?.url as string) ?? "",
+            avatarId: (avatar?.fileId as string) ?? ""
+        },
+        coverImageFile: {
+            coverImageUrl: (coverImage?.url as string) ?? "",
+            coverImageId: (coverImage?.fileId as string) ?? ""
+        }
     });
 
     const savedUserData = await User.findById(user._id).select(
@@ -184,16 +196,8 @@ const signOutUser = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .clearCookie("accessToken", {
-            httpOnly: true,
-            secure: false,
-            path: "/"
-        })
-        .clearCookie("refreshToken", {
-            httpOnly: true,
-            secure: false,
-            path: "/"
-        })
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
         .json(
             apiResponse({
                 statusCode: 200,
@@ -403,19 +407,24 @@ const updateAvatar = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
-            $set: { avatar: newAvatar?.url }
+            $set: {
+                avatarFile: {
+                    avatarId: newAvatar?.url,
+                    avatarUrl: newAvatar?.fileId
+                }
+            }
         },
         {
             new: true,
             runValidators: true
         }
-    ).select("-password");
+    ).select("-password -refreshToken");
 
     return res.status(200).json(
         apiResponse({
             statusCode: 200,
             message: "Avatar has been updated",
-            data: { newAvatarUrl: newAvatar?.url }
+            data: { newAvatarUrl: user }
         })
     );
 });
@@ -452,19 +461,24 @@ const updateCoverImage = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
-            $set: { coverImage: newCoverImage?.url }
+            $set: {
+                coverImageFile: {
+                    coverImageUrl: newCoverImage?.url,
+                    coverImageId: newCoverImage?.fileId
+                }
+            }
         },
         {
             new: true,
             runValidators: true
         }
-    ).select("-password");
+    ).select("-password -refreshToken");
 
     return res.status(200).json(
         apiResponse({
             statusCode: 200,
             message: "Cover Image has been updated",
-            data: { coverImage: newCoverImage?.url }
+            data: user as object
         })
     );
 });
@@ -623,6 +637,149 @@ const getUserWatchHistory = asyncHandler(async (req, res) => {
     );
 });
 
+const deleteUserAccount = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId as string)) {
+        return res.status(400).json(
+            apiResponse({
+                statusCode: 400,
+                message: "Either missing or invalid userId",
+                success: false
+            })
+        );
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+        return res.status(404).json(
+            apiResponse({
+                statusCode: 404,
+                message: "No user found for this userId",
+                success: false
+            })
+        );
+    }
+
+    const isOwner = userId === req.user._id.toString();
+
+    if (!isOwner) {
+        return res.status(403).json(
+            apiResponse({
+                statusCode: 403,
+                message: "Only owner can delete the account.",
+                success: false
+            })
+        );
+    }
+
+    const session = await mongoose.startSession();
+    const videos = await Video.find({
+        owner: userId as unknown as mongoose.Schema.Types.ObjectId
+    });
+
+    if (!videos.length) {
+        const fileIdsToBeDeleted: string[] = [];
+        videos.forEach((video) => {
+            if (video.videoFile.videoId) {
+                fileIdsToBeDeleted.push(video.videoFile.videoId);
+            }
+            if (video.thumbnail.thumbnailId) {
+                fileIdsToBeDeleted.push(video.thumbnail.thumbnailId);
+            }
+        });
+
+        try {
+            const chunkSize = 100;
+            for (let i = 0; i <= chunkSize; i++) {
+                const chunk = fileIdsToBeDeleted.slice(i, i + chunkSize);
+                await client.files.bulk.delete({ fileIds: chunk });
+            }
+            await client.files.bulk.delete({
+                fileIds: [
+                    user.avatarFile.avatarId,
+                    user.coverImageFile.coverImageId
+                ]
+            });
+        } catch (err) {
+            return res.status(500).json(
+                apiResponse({
+                    statusCode: 500,
+                    message: "Couldn't delete media files from storage",
+                    success: false
+                })
+            );
+        }
+    }
+
+    try {
+        session.startTransaction();
+
+        await Video.deleteMany(
+            { owner: userId as unknown as mongoose.Schema.Types.ObjectId },
+            { session }
+        );
+        await Tweet.deleteMany(
+            { owner: userId as unknown as mongoose.Schema.Types.ObjectId },
+            { session }
+        );
+        await Subscription.deleteMany(
+            {
+                $or: [
+                    {
+                        subscriber:
+                            userId as unknown as mongoose.Schema.Types.ObjectId
+                    },
+                    {
+                        channel:
+                            userId as unknown as mongoose.Schema.Types.ObjectId
+                    }
+                ]
+            },
+            { session }
+        );
+        await Like.deleteMany(
+            { likedBy: userId as unknown as mongoose.Schema.Types.ObjectId },
+            { session }
+        );
+        await Comment.deleteMany(
+            { owner: userId as unknown as mongoose.Schema.Types.ObjectId },
+            { session }
+        );
+        await Playlist.deleteMany(
+            { owner: userId as unknown as mongoose.Schema.Types.ObjectId },
+            { session }
+        );
+        await User.findByIdAndDelete(userId);
+
+        await session.commitTransaction();
+        return res
+            .status(200)
+            .clearCookie("accessToken", options)
+            .clearCookie("refreshCookie", options)
+            .json(
+                apiResponse({
+                    statusCode: 200,
+                    message: "User deleted successfully!"
+                })
+            );
+    } catch (err: any) {
+        await session.abortTransaction();
+        return res.status(500).json(
+            apiResponse({
+                statusCode: 500,
+                message:
+                    err?.message ||
+                    "Failed to delete account. Transaction aborted.",
+                success: false
+            })
+        );
+    } finally {
+        await session.endSession();
+    }
+});
+
 export {
     registerUser,
     signInUser,
@@ -634,5 +791,6 @@ export {
     updateAvatar,
     updateCoverImage,
     getUserChannel,
-    getUserWatchHistory
+    getUserWatchHistory,
+    deleteUserAccount
 };

@@ -71,7 +71,7 @@ const getUserPlaylist = asyncHandler(async (req, res) => {
                                     $project: {
                                         username: 1,
                                         fullName: 1,
-                                        avatar: 1
+                                        avatarFile: 1
                                     }
                                 }
                             ]
@@ -266,7 +266,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
                                     $project: {
                                         username: 1,
                                         fullName: 1,
-                                        avatar: 1
+                                        avatarFile: 1
                                     }
                                 }
                             ]

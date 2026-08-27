@@ -86,7 +86,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
                     {
                         $project: {
                             username: 1,
-                            avatar: 1,
+                            avatarFile: 1,
                             fullName: 1,
                             _id: 1
                         }
@@ -102,7 +102,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
                 _id: "$subscriber._id",
                 username: "$subscriber.username",
                 fullName: "$subscriber.fullName",
-                avatar: "$subscriber.avatar",
+                avatar: "$subscriber.avatarFile",
                 subscribedAt: "$createdAt"
             }
         }
@@ -155,7 +155,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
                     {
                         $project: {
                             username: 1,
-                            avatar: 1,
+                            avatarFile: 1,
                             fullName: 1,
                             _id: 1
                         }
@@ -171,7 +171,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
                 _id: "$channel._id",
                 username: "$channel.username",
                 fullName: "$channel.fullName",
-                avatar: "$channel.avatar",
+                avatar: "$channel.avatarFile",
                 subscribedAt: "$createdAt"
             }
         }
