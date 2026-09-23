@@ -28,15 +28,15 @@ videoRoute.post(
     ]),
     publishVideo
 );
-videoRoute.get("/all-videos{:/userId}", findAllVidoes);
-videoRoute.get("/find-video{:/videoId}", findOneVideo);
+videoRoute.get("/all-videos{/:userId}", findAllVidoes);
+videoRoute.get("/find-video{/:videoId}", findOneVideo);
 videoRoute.patch(
-    "/update-video-status{:/videoId}",
+    "/update-video-status{/:videoId}",
     verifyJWT,
     updateVideoStatus
 );
-videoRoute.patch("/increase-view-count{:/videoId}", increaseViewCount);
-videoRoute.delete("/delete-video{:/videoId}", verifyJWT, deleteVideo);
-videoRoute.delete("/delete-video{:/userId}", verifyJWT, deleteAllVideos);
+videoRoute.patch("/increase-view-count{/:videoId}", increaseViewCount);
+videoRoute.delete("/delete-video{/:videoId}", verifyJWT, deleteVideo);
+videoRoute.delete("/delete-video{/:userId}", verifyJWT, deleteAllVideos);
 
 export default videoRoute;

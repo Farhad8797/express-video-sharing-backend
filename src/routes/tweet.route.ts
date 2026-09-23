@@ -10,8 +10,8 @@ import { verifyJWT } from "../middlewares/auth.js";
 const tweetRoute = Router();
 
 tweetRoute.post("/create-tweet", verifyJWT, createTweet);
-tweetRoute.get("/comments{:/userId}", getUserTweet);
-tweetRoute.patch("/tweet/u/{:/tweetid}", verifyJWT, updateTweet);
-tweetRoute.delete("/tweet/d/{:/tweetId}", verifyJWT, deleteTweet);
+tweetRoute.get("/comments{/:userId}", getUserTweet);
+tweetRoute.patch("/tweet/u/{/:tweetid}", verifyJWT, updateTweet);
+tweetRoute.delete("/tweet/d/{/:tweetId}", verifyJWT, deleteTweet);
 
 export default tweetRoute;

@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiResponse } from "../utils/apiResponse.js";
-import type { UserInterface } from "../models/userModel.js";
+import { type UserInterface } from "../models/userModel.js";
 import User from "../models/userModel.js";
 import { client, uploadFile } from "../utils/imagekit.js";
 import { clearTemp } from "../utils/clearTemp.js";
@@ -14,8 +14,9 @@ import { Subscription } from "../models/subscriptionModel.js";
 import { Like } from "../models/likeModel.js";
 import { Comment } from "../models/commentModel.js";
 import { Playlist } from "../models/playlistModel.js";
+import { type CookieOptions } from "express";
 
-const options: object = {
+const options: CookieOptions = {
     httpOnly: true,
     secure: false,
     path: "/"
@@ -134,9 +135,7 @@ const signInUser = asyncHandler(async (req, res) => {
         );
     }
 
-    const user = await User.findOne({
-        $or: [{ email }, { username }]
-    });
+    const user = await User.findOne({ $or: [{ email }, { username }] });
 
     if (!user) {
         return res.status(400).json(
@@ -404,27 +403,22 @@ const updateAvatar = asyncHandler(async (req, res) => {
         );
     }
 
-    const user = await User.findByIdAndUpdate(
-        req.user?._id,
-        {
-            $set: {
-                avatarFile: {
-                    avatarId: newAvatar?.url,
-                    avatarUrl: newAvatar?.fileId
-                }
-            }
-        },
-        {
-            new: true,
-            runValidators: true
-        }
-    ).select("-password -refreshToken");
+    const user = await User.findById(req.user._id).select(
+        "-password -refreshToken"
+    );
+    if (user?.avatarFile.avatarId) {
+        await client.files.delete(user?.avatarFile.avatarId);
+    }
+
+    user!.avatarFile.avatarId = newAvatar.fileId as string;
+    user!.avatarFile.avatarUrl = newAvatar.url as string;
+    await user?.save();
 
     return res.status(200).json(
         apiResponse({
             statusCode: 200,
             message: "Avatar has been updated",
-            data: { newAvatarUrl: user }
+            data: user
         })
     );
 });
@@ -458,27 +452,22 @@ const updateCoverImage = asyncHandler(async (req, res) => {
         );
     }
 
-    const user = await User.findByIdAndUpdate(
-        req.user?._id,
-        {
-            $set: {
-                coverImageFile: {
-                    coverImageUrl: newCoverImage?.url,
-                    coverImageId: newCoverImage?.fileId
-                }
-            }
-        },
-        {
-            new: true,
-            runValidators: true
-        }
-    ).select("-password -refreshToken");
+    const user = await User.findById(req.user._id).select(
+        "-password -refreshToken"
+    );
+    if (user?.coverImageFile.coverImageId) {
+        await client.files.delete(user?.coverImageFile.coverImageId);
+    }
+
+    user!.coverImageFile.coverImageId = newCoverImage.fileId as string;
+    user!.coverImageFile.coverImageUrl = newCoverImage.url as string;
+    await user?.save();
 
     return res.status(200).json(
         apiResponse({
             statusCode: 200,
             message: "Cover Image has been updated",
-            data: user as object
+            data: user
         })
     );
 });

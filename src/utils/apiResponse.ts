@@ -2,7 +2,7 @@ interface ApiResponse {
     statusCode: number;
     message: string;
     success?: boolean;
-    data?: object;
+    data?: any;
 }
 
 export function apiResponse({

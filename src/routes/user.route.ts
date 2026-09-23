@@ -33,8 +33,8 @@ userRoute.post(
     registerUser
 );
 
-userRoute.post("/signIn", signInUser);
-userRoute.post("/signOut", verifyJWT, signOutUser);
+userRoute.post("/sign-in", signInUser);
+userRoute.post("/sign-out", verifyJWT, signOutUser);
 userRoute.post("/refresh-token", refreshAccessToken);
 userRoute.patch("/change-password", verifyJWT, changePassword);
 userRoute.get("/get-current-user", verifyJWT, getCurrentUser);
@@ -54,6 +54,6 @@ userRoute.patch(
 
 userRoute.get("/channel{/:username}", verifyJWT, getUserChannel);
 userRoute.get("/watch-history", verifyJWT, getUserWatchHistory);
-userRoute.post("/delete-account{:/userId}", verifyJWT, deleteUserAccount);
+userRoute.post("/delete-account{/:userId}", verifyJWT, deleteUserAccount);
 
 export default userRoute;

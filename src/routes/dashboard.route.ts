@@ -5,7 +5,7 @@ import { verifyJWT } from "../middlewares/auth.js";
 const dashboardRoute = Router();
 
 dashboardRoute.get(
-    "/channel/dashboard{:/channelId}",
+    "/channel/dashboard{/:channelId}",
     verifyJWT,
     getChannelStats
 );
