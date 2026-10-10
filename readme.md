@@ -51,7 +51,7 @@ This project handles end-to-end user authentication, secure media uploads, video
 ### Clone the repo
 
 ```bash
-git clone https://github.com/Farhad8797/express-social-backend.git
+git clone https://github.com/Farhad8797/express-video-sharing-backend.git
 ```
 
 ### Install the dependencies
