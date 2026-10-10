@@ -1,0 +1,78 @@
+###
+POST http://localhost:8000/api/register
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary7MA4YWxkTrZu0gW
+
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="fullName"
+
+John Doe
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="username"
+
+johndoe
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="email"
+
+john@example.com
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="password"
+
+securepassword123
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="avatar"; filename="avatar.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\HP\OneDrive\Documents\Lion-1-01.jpg
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="coverImage"; filename="cover.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\HP\Downloads\lance-reis-pp76Y6Fq6xw-unsplash.jpg
+--WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Signing in user
+POST http://localhost:8000/api/sign-in
+Content-Type: application/json
+
+{
+    "email":"john@example.com",
+    "password":"securepassword123"
+}
+
+### Getting the current
+GET http://localhost:8000/api/get-current-user
+
+### generating token pairs
+POST http://localhost:8000/api/refresh-token
+
+### change password
+PATCH http://localhost:8000/api/change-password
+Content-Type: application/json
+
+{
+    "oldPassword": "securepassword123",
+    "newPassword": "asdfghjkl"
+}
+
+### Update User Avatar
+PATCH http://localhost:8000/api/update-avatar
+Content-Type: multipart/form-data; boundary=WebKitFormBoundaryAvatarUpdate
+
+--WebKitFormBoundaryAvatarUpdate
+Content-Disposition: form-data; name="avatar"; filename="new-avatar.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\HP\OneDrive\Documents\Lion-1-01.jpg
+--WebKitFormBoundaryAvatarUpdate--
+
+
+### Update User Cover Image
+PATCH http://localhost:8000/api/update-coverImage
+Content-Type: multipart/form-data; boundary=WebKitFormBoundaryCoverUpdate
+
+--WebKitFormBoundaryCoverUpdate
+Content-Disposition: form-data; name="coverImage"; filename="new-cover.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\HP\Downloads\jeroen-den-otter-2b0JeJTEclQ-unsplash.jpg
+--WebKitFormBoundaryCoverUpdate--

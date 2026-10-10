@@ -261,6 +261,18 @@ const increaseViewCount = asyncHandler(async (req, res) => {
         );
     }
 
+    const video = await Video.findById(videoId);
+    if (!video || !video.isPublished) {
+        return res.status(404).json(
+            apiResponse({
+                statusCode: 404,
+                message:
+                    "Video not found or it is not public to be viewed yet.",
+                success: false
+            })
+        );
+    }
+
     const identifier = req.ip;
     const redisKeyForViewer = `${videoId}+${identifier}`;
     const hasViewed = await redis.get(redisKeyForViewer);
@@ -274,23 +286,8 @@ const increaseViewCount = asyncHandler(async (req, res) => {
         );
     }
 
-    const video = await Video.findByIdAndUpdate(
-        videoId,
-        {
-            $set: { views: { $inc: 1 } }
-        },
-        { new: true }
-    );
-
-    if (!video) {
-        return res.status(404).json(
-            apiResponse({
-                statusCode: 404,
-                message: "Video not found!",
-                success: false
-            })
-        );
-    }
+    video.views += 1;
+    await video.save();
     await redis.set(redisKeyForViewer, "1", "EX", 3600, "NX");
 
     return res.status(200).json(
