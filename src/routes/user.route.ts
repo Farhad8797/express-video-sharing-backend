@@ -54,6 +54,6 @@ userRoute.patch(
 
 userRoute.get("/channel{/:username}", verifyJWT, getUserChannel);
 userRoute.get("/watch-history", verifyJWT, getUserWatchHistory);
-userRoute.post("/delete-account{/:userId}", verifyJWT, deleteUserAccount);
+userRoute.delete("/delete-account{/:userId}", verifyJWT, deleteUserAccount);
 
 export default userRoute;

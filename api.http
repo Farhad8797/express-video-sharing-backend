@@ -105,7 +105,7 @@ Content-Type: image/jpeg
 DELETE http://localhost:8000/api/delete-video/6ac99dac2e2001e224964e00
 
 ### get a video
-GET http://localhost:8000/api/find-video/6ac9a0fd2e2001e224964e01
+GET http://localhost:8000/api/find-video/6ac9bd897886c67692a126ac
 
 ### get all videos from this user
 GET http://localhost:8000/api/all-videos/6ab3718a209a1e7de3b38abb
@@ -139,4 +139,38 @@ Content-Type: application/json
 }
 
 ### deleting the tweet
-DELETE http://localhost:8000/api/tweetd/d/6ac9b691b03b2b42e3a9e7ff
+DELETE http://localhost:8000/api/tweet/d/6ac9b691b03b2b42e3a9e7ff
+
+### adding comment to a video
+POST http://localhost:8000/api/video/6ac9bd897886c67692a126ac/add-comment
+Content-Type: application/json
+
+{
+    "content":"Dummy comment for testing"
+}
+
+### updating a coment
+PATCH http://localhost:8000/api/update-comment/6ac9c9e33e20944cb7cdf5dd
+Content-Type: application/json
+
+{
+    "content":"Updated dummy comment"
+}
+
+### deleting a comment
+DELETE http://localhost:8000/api/delete-comment/6ac9c9e33e20944cb7cdf5dd
+
+### subscribing to a channel
+POST http://localhost:8000/api/subscription/6ab3718a209a1e7de3b38abb
+
+### getting subscribers
+GET http://localhost:8000/api/subscriptions/6ab3718a209a1e7de3b38abb/subscribers
+
+### getting subcribed channels
+GET http://localhost:8000/api/subscriptions/6ab3718a209a1e7de3b38abb/channels
+
+### Seeing user dashboard
+GET http://localhost:8000/api/channel/dashboard/6ab3718a209a1e7de3b38abb
+
+### Deleting the user (Destructive! This will delete the videos, tweets, comments, likes and everything made by the user and then delete the user itself)
+DELETE http://localhost:8000/api/delete-account/6ab3718a209a1e7de3b38abb

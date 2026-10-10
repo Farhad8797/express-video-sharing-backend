@@ -668,40 +668,6 @@ const deleteUserAccount = asyncHandler(async (req, res) => {
         owner: userId as unknown as mongoose.Schema.Types.ObjectId
     });
 
-    if (!videos.length) {
-        const fileIdsToBeDeleted: string[] = [];
-        videos.forEach((video) => {
-            if (video.videoFile.videoId) {
-                fileIdsToBeDeleted.push(video.videoFile.videoId);
-            }
-            if (video.thumbnail.thumbnailId) {
-                fileIdsToBeDeleted.push(video.thumbnail.thumbnailId);
-            }
-        });
-
-        try {
-            const chunkSize = 100;
-            for (let i = 0; i <= chunkSize; i++) {
-                const chunk = fileIdsToBeDeleted.slice(i, i + chunkSize);
-                await client.files.bulk.delete({ fileIds: chunk });
-            }
-            await client.files.bulk.delete({
-                fileIds: [
-                    user.avatarFile.avatarId,
-                    user.coverImageFile.coverImageId
-                ]
-            });
-        } catch (err) {
-            return res.status(500).json(
-                apiResponse({
-                    statusCode: 500,
-                    message: "Couldn't delete media files from storage",
-                    success: false
-                })
-            );
-        }
-    }
-
     try {
         session.startTransaction();
 
@@ -709,6 +675,39 @@ const deleteUserAccount = asyncHandler(async (req, res) => {
             { owner: userId as unknown as mongoose.Schema.Types.ObjectId },
             { session }
         );
+        if (!videos.length) {
+            const fileIdsToBeDeleted: string[] = [];
+            videos.forEach((video) => {
+                if (video.videoFile.videoId) {
+                    fileIdsToBeDeleted.push(video.videoFile.videoId);
+                }
+                if (video.thumbnail.thumbnailId) {
+                    fileIdsToBeDeleted.push(video.thumbnail.thumbnailId);
+                }
+            });
+
+            try {
+                const chunkSize = 100;
+                for (let i = 0; i <= chunkSize; i++) {
+                    const chunk = fileIdsToBeDeleted.slice(i, i + chunkSize);
+                    await client.files.bulk.delete({ fileIds: chunk });
+                }
+                await client.files.bulk.delete({
+                    fileIds: [
+                        user.avatarFile.avatarId,
+                        user.coverImageFile.coverImageId
+                    ]
+                });
+            } catch (err) {
+                return res.status(500).json(
+                    apiResponse({
+                        statusCode: 500,
+                        message: "Couldn't delete media files from storage",
+                        success: false
+                    })
+                );
+            }
+        }
         await Tweet.deleteMany(
             { owner: userId as unknown as mongoose.Schema.Types.ObjectId },
             { session }
