@@ -37,6 +37,6 @@ videoRoute.patch(
 );
 videoRoute.patch("/increase-view-count{/:videoId}", increaseViewCount);
 videoRoute.delete("/delete-video{/:videoId}", verifyJWT, deleteVideo);
-videoRoute.delete("/delete-video{/:userId}", verifyJWT, deleteAllVideos);
+videoRoute.delete("/delete-all-videos{/:userId}", verifyJWT, deleteAllVideos);
 
 export default videoRoute;
