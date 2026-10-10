@@ -76,3 +76,67 @@ Content-Type: image/jpeg
 
 < C:\Users\HP\Downloads\jeroen-den-otter-2b0JeJTEclQ-unsplash.jpg
 --WebKitFormBoundaryCoverUpdate--
+
+### Publishing a video
+POST http://localhost:8000/api/upload-video 
+Content-Type: multipart/form-data; boundary=WebKitFormBoundaryVideoUpload
+
+--WebKitFormBoundaryVideoUpload
+Content-Disposition: form-data; name="title"
+
+Beautiful waterfall
+--WebKitFormBoundaryVideoUpload
+Content-Disposition: form-data; name="description"
+
+A wonderful waterfall in an unknown country.
+--WebKitFormBoundaryVideoUpload
+Content-Disposition: form-data; name="video"; filename="waterfall.mp4"
+Content-Type: video/mp4
+
+< C:\Users\HP\Downloads\12480263_540_960_30fps.mp4
+--WebKitFormBoundaryVideoUpload
+Content-Disposition: form-data; name="thumbnail"; filename="thumbnail.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\HP\Downloads\pexels-stephane-hurbe-1267753-12360414.jpg
+--WebKitFormBoundaryVideoUpload--
+
+### deleting a video
+DELETE http://localhost:8000/api/delete-video/6ac99dac2e2001e224964e00
+
+### get a video
+GET http://localhost:8000/api/find-video/6ac9a0fd2e2001e224964e01
+
+### get all videos from this user
+GET http://localhost:8000/api/all-videos/6ab3718a209a1e7de3b38abb
+
+### increasing view count (watching a video)
+PATCH http://localhost:8000/api/increase-view-count/6ac9b29229ad956afe4204c3
+
+### updating video status
+PATCH http://localhost:8000/api/update-video-status/6ac9b29229ad956afe4204c3
+
+### deleting all videos that belong to this user
+DELETE http://localhost:8000/api/delete-all-videos/6ab3718a209a1e7de3b38abb
+
+### creating a tweet
+POST http://localhost:8000/api/create-tweet/
+Content-Type: application/json
+
+{
+    "content": "Code. Test. Ship. Repeat. ⚡"
+}
+
+### get this user tweet
+GET http://localhost:8000/api/tweets/6ab3718a209a1e7de3b38abb
+
+### updating the tweet
+PATCH http://localhost:8000/api/tweet/u/6ac9bca07886c67692a126ab
+Content-Type: application/json
+
+{
+    "content":"Do not give up"
+}
+
+### deleting the tweet
+DELETE http://localhost:8000/api/tweetd/d/6ac9b691b03b2b42e3a9e7ff

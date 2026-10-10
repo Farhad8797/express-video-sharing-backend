@@ -384,7 +384,7 @@ const deleteComment = asyncHandler(async (req, res) => {
     return res.status(200).json(
         apiResponse({
             statusCode: 200,
-            message: "Only owner can delete this comment."
+            message: "Comment has been deleted successfully!"
         })
     );
 });

@@ -39,6 +39,7 @@ import likeRoute from "./routes/like.route.js";
 import playlistRouter from "./routes/playlist.route.js";
 import healthcheckRouter from "./routes/healthcheck.route.js";
 import dashboardRoute from "./routes/dashboard.route.js";
+import subscriptionRouter from "./routes/subscription.route.js";
 
 app.use("/api", userRoute);
 app.use("/api", videoRoute);
@@ -48,6 +49,7 @@ app.use("/api", likeRoute);
 app.use("/api", playlistRouter);
 app.use("/api", healthcheckRouter);
 app.use("/api", dashboardRoute);
+app.use("/api", subscriptionRouter);
 app.use("/*splat", (req: Request, res: Response) => {
     return res.status(404).json(
         apiResponse({

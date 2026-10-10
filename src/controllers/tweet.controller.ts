@@ -168,7 +168,7 @@ const deleteTweet = asyncHandler(async (req, res) => {
     return res.status(200).json(
         apiResponse({
             statusCode: 200,
-            message: "Tweet delete successfully!"
+            message: "Tweet has been deleted successfully!"
         })
     );
 });

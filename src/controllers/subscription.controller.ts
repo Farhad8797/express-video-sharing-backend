@@ -43,9 +43,9 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     } else {
         await isUserSubscribed.deleteOne();
 
-        return res.status(201).json(
+        return res.status(200).json(
             apiResponse({
-                statusCode: 201,
+                statusCode: 200,
                 message: "Unsubscribed!"
             })
         );
