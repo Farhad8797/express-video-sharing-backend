@@ -26,7 +26,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const { fullName, username, email, password }: UserInterface = req.body;
     if (
         [fullName, username, email, password].some(
-            (element) => element?.trim() === ""
+            (element) => !element || element?.trim() === ""
         )
     ) {
         clearTemp();
