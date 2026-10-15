@@ -69,21 +69,12 @@ const registerUser = asyncHandler(async (req, res) => {
         );
     }
 
-    const avatar = await uploadFile(avatarLocalPath as string, "avatar");
-    const coverImage = await uploadFile(
-        coverImageLocalPath as string,
-        "coverImage"
-    );
-
-    if (!avatar) {
-        return res.status(400).json(
-            apiResponse({
-                statusCode: 400,
-                message: "Avatar not uploaded to Imagekit",
-                success: false
-            })
-        );
-    }
+    const avatar = avatarLocalPath
+    ? await uploadFile(avatarLocalPath as string, "avatar")
+    : undefined;
+  const coverImage = coverImageLocalPath
+    ? await uploadFile(coverImageLocalPath as string, "coverImage")
+    : undefined;
 
     const user = await User.create({
         username,
@@ -103,16 +94,6 @@ const registerUser = asyncHandler(async (req, res) => {
     const savedUserData = await User.findById(user._id).select(
         "-password -watch_history"
     );
-
-    if (!savedUserData) {
-        return res.status(500).json(
-            apiResponse({
-                statusCode: 500,
-                message: "Internal sever error",
-                success: false
-            })
-        );
-    }
 
     return res.status(201).json(
         apiResponse({
