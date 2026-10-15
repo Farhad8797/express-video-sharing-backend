@@ -106,11 +106,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const signInUser = asyncHandler(async (req, res) => {
     const { email, username, password }: UserInterface = req.body;
-    if (!email && !username) {
+    if ((!email && !username) || !password) {
         return res.status(400).json(
             apiResponse({
                 statusCode: 400,
-                message: "Email or username must be provided",
+                message: "Email/username and password must be provided",
                 success: false
             })
         );
